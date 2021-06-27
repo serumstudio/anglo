@@ -31,7 +31,6 @@ RE_CC_TO_UNDERSCORE = re.compile("([a-z0-9])([A-Z])") # Regular Expression for c
 
 
 
-
 def build_route(pattern, finishing, kwargs, name, builders):
     if not finishing:
         assert not name
@@ -70,7 +69,7 @@ class BaseRouter:
     def __init__(self, builders=None):
 
         self.builders           = builders or route_builders
-        self.match              = {}
+        self.match_map          = {}
         self.mapping            = []
 
         self.route_map          = {}
@@ -88,10 +87,10 @@ class BaseRouter:
 
         if route.exact_matches:
             for pattern, kwargs in route.exact_matches:
-                if pattern in self.route_map:  # the route or pattern already exist
+                if pattern in self.match_map:  # the route or pattern already exist
                     print(f"{pattern} Already exists. Overriding..")
 
-                self.route_map[pattern] = (handler, kwargs)
+                self.match_map[pattern] = (handler, kwargs)
 
             route.exact_matches = None
 
@@ -116,15 +115,15 @@ class BaseRouter:
         if route.exact_matches:
 
             for p, kwargs in route.exact_matches:
-                for k, v in included.route_map.items():
+                for k, v in included.match_map.items():
                     k = p + k
-                    if k in self.route_map: 
+                    if k in self.match_map: 
                         print(f"{pattern} Already exists. Overriding..")
 
                     h, kw = v
-                    self.route_map[k] = (h, dict(kwargs, **kw))
+                    self.match_map[k] = (h, dict(kwargs, **kw))
             route.exact_matches = None
-            included.route_map = {}
+            included.match_map = {}
 
             if included.mapping:
                 self.mapping.append((route.match, included))
@@ -177,8 +176,8 @@ class BaseRouter:
         """
         Match the given path to the routing table
         """
-        if path in self.route_map:
-            return self.route_map[path]
+        if path in self.match_map:
+            return self.match_map[path]
 
         for match, handler in self.mapping:
             matched, kwargs = match(path)
@@ -211,6 +210,7 @@ class BaseRouter:
             return "".join(
                 [path(kwargs) for path in self.inner_route_map[name]]
             )
+
 
 class Router(BaseRouter):
     """
