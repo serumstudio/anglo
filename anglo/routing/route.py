@@ -22,6 +22,7 @@
 
 
 # DIFFERENT TYPE OF ROUTERS
+# From wheezy.routing
 
 import re
 from .utils import outer_split
@@ -134,10 +135,10 @@ def build_curly_route(pattern, finishing=True, kwargs=None, name=None):
     """Convert pattern expression into regex with
     named groups and create regex route.
     """
-    if isinstance(pattern, RegEx):
+    if isinstance(pattern, RegexRoute):
         return pattern
-    if RE_SPLIT.search(pattern):
-        return RegEx(convert(pattern), finishing, kwargs, name)
+    if RE_SPLIT_CURLY.search(pattern):
+        return RegexRoute(convert(pattern), finishing, kwargs, name)
 
     return None
 
@@ -147,10 +148,10 @@ def build_plain_route(pattern, finishing=True, kwargs=None, name=None):
     If the plain route regular expression match the pattern
     than create a Plain `:class:` instance.
     """
-    if isinstance(pattern, Plain):
+    if isinstance(pattern, PlainRoute):
         return pattern
     if pattern == "" or RE_PLAIN_ROUTE.match(pattern):
-        return Plain(pattern, finishing, kwargs, name)
+        return PlainRoute(pattern, finishing, kwargs, name)
 
     return None
 
@@ -159,9 +160,9 @@ def build_regex_route(pattern, finishing=True, kwargs=None, name=None):
     There is no special tests to match regex selection
     strategy.
     """
-    if isinstance(pattern, RegEx):
+    if isinstance(pattern, RegexRoute):
         return pattern
-    return RegEx(pattern, finishing, kwargs, name)
+    return RegexRoute(pattern, finishing, kwargs, name)
 
 
 def build_choice_route(pattern, finishing=True, kwargs=None, name=None):
@@ -178,10 +179,12 @@ def build_choice_route(pattern, finishing=True, kwargs=None, name=None):
 route_builders = [ build_plain_route, build_regex_route, build_curly_route, build_choice_route ]
 
 
-class RegEx:
+class RegexRoute:
     """
     A route based on regular expression.
     """
+
+    exact_matches = None
 
     def __init__(self, pattern, finishing=True, kwargs=None, name=None):
         pattern = pattern.lstrip("^").rstrip("$")
@@ -253,7 +256,7 @@ class RegEx:
 
 
 
-class Choice:
+class ChoiceRoute:
     """
     Route based on choice match, e.g. {locale:(en|ru)}.
     """
@@ -294,7 +297,7 @@ class Choice:
             values = self.kwargs
         return self.path_format % values[self.name]
 
-class Plain:
+class PlainRoute:
     """
     A route based on a plain string.
     """
