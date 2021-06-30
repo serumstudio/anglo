@@ -62,16 +62,29 @@ def route_name(handler):
 class BaseRouter:
 
     """
-    A main class for Router
+    A main class for Router. It holds matching, url/route tables
+    and more, as well as adding routes.
+
+    Arguments:
+        builders (route_builders):
+            A route builder rule for the router. It returns the default
+            value which is `route_builders`
 
     """
 
     def __init__(self, builders=None):
-
+        
+        #: A route builder rule for the router.
+        #: It return the default route_builders.
         self.builders           = builders or route_builders
-        self.match_map          = {}
-        self.mapping            = []
 
+        
+        #: A matching map for the routes where all matching routes stored.
+        self.match_map          = {}
+        
+        #: Just a mapping where it stores data. Typically a list.
+        self.mapping            = []
+        
         self.route_map          = {}
         self.inner_route_map    = {}
 
