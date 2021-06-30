@@ -21,9 +21,45 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+from typing import Optional
+from anglo.utils import get_root_path
+
 class Anglo:
     """
-
+    This `:class:` implements WSGI application that holds
+    routing, session, middlewares and more.
     """
+
+    def __init__(self, name: str,
+            static_folder: Optional[str] = "static",
+            static_url_path: Optional[str] = "/static",
+            template_folder: Optional[str] = "templates"):
+
+        
+        #: The name of the package to be imported 
+        #: this is required in order for the debugger to work.
+        self.name               = name
+
+
+        #: The main root path of the imported package
+        #: This path is used for the debugger and other purposes
+        self.root_path          = get_root_path(self.name)
+        
+
+        #: Static folder for the application.
+        #: *Optional; And the default value is static
+        self.static_folder      = static_folder
+
+
+        #: Static url path to be served for the application
+        #: *Optional; The default value is /static.
+        self.static_url_path    = static_url_path
+
+
+        #: Template folder for the application
+        #: *Optional; The default value is templates
+        self.template_folder    = template_folder
+
+
 
     
