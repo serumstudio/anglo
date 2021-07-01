@@ -154,3 +154,14 @@ class PasteServer(ServerAdapter):
             app, host=self.host, 
             port=self.port, **self.options
         )
+
+
+class AngloServerAdapter(ServerAdapter):
+    """
+    A default Anglo Server used for debugging. Haven't tried on production yet.
+    """
+
+    def run(self, app):
+        from anglo.server import AngloServer
+        server = AngloServer(self.host, self.port, app)
+        server.serve_forever()
