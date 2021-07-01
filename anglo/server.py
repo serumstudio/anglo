@@ -126,3 +126,98 @@ class AlgoServer:
         #: Start the server by listening to request queue size.
         self.socket.listen(self.request_queue_size)
     
+
+    def setup_environ(self):
+        """
+        Set the environment variables for the WSGI Server. See: https://www.python.org/dev/peps/pep-0333/#environ-variables 
+        for more information.
+        """
+
+        #: Set up base environment
+        
+        env = self.base_environ = {}
+        env['SERVER_NAME'] = self.server_name
+        env['GATEWAY_INTERFACE'] = 'CGI/1.1'
+        env['SERVER_PORT'] = str(self.server_port)
+        env['REMOTE_HOST'] = ''
+        env['CONTENT_LENGTH'] = ''
+        env['SCRIPT_NAME'] = ''
+
+    def serve_forever(self):
+        """
+        Serve the server forever while the application is running.
+        """
+
+        while True:
+            #: Handle the request
+            self.handle_request()
+
+            #: After the one request, close the connection between the client
+            self.client_connection.close()
+            
+    
+    def handle_request(self):
+        """
+        Handle the request for the WSGI Server. Only one request that can be handle
+        at the same time
+        """
+
+        #: Get the connection, address for the upcoming connection.
+        self.client_connection, self.client_address = self.socket.accept()
+        
+        #: The value for the bytes to receive. Max value is 65536
+        recv_value = 65536
+
+        #: Raw request from the client.
+        self.raw_req = self.client_connection.recv(recv_value)
+
+        #: Parse the raw request as well as the headers from it. 
+        self.parse_request(self.raw_req)
+        
+        #: The headers from the parsed raw request
+        headers = self.parse_headers(self.raw_req)
+        
+        #: The legnth of the headers from the parsed headers from raw request.
+        length = int(self.headers.get('Content-Length', '0'))
+
+        while len(self.raw_req) == length:
+            # If the length of the raw request is equal to length of the header, add it to the raw req.
+            self.raw_req += self.client_connection.recv(recv_value)
+
+
+        #: Get the environment variable of the WSGI Server.
+        env = self.get_environ()
+
+        # Print the output of the request.
+        print('(%s) [%s] "%s %s %s"' % (
+            self.server_version, datetime.datetime.now(), env["REQUEST_METHOD"],
+            env["PATH_INFO"], env["SERVER_PROTOCOL"]
+        ))
+
+    def parse_request(self, raw_request):
+
+        # GET /foo?a=1&b=2 HTTP/1.1
+
+        first_line = raw_request.split(b'\r\n', 1)[0].strip().decode()
+        
+        (self.request_method,   # GET
+         self.path,             # /foo?a=1&b=2
+         self.request_version   # HTTP/1.1
+        ) = first_line.split()
+
+    def parse_headers(self, raw_request):
+
+        #: The header string from the raw_request
+        header_string = raw_request.split(b'\r\n\r\n', 1)[0].decode()
+        
+        self.headers = headers = {}
+        
+        for header in header_string.splitlines()[1:]:
+            k, v = header.split(':', 1)
+            if headers.get(k):
+                #: Multiple with the same name header
+                headers[k] += ', ' + v.strip()
+
+            else:
+                headers[k] = v.strip()
+
