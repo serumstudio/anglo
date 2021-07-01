@@ -156,8 +156,8 @@ class AngloServer:
 
         year, month, day, hh, mm, ss, wd, y, z = time.gmtime(timestamp)
         s = '%s, %02d %3s %4d %02d:%02d:%02d GMT' % (
-            self.weekdayname[wd],
-            day, self.monthname[month], year,
+            weekdays[wd],
+            day, months[month], year,
             hh, mm, ss
         )
         return s
