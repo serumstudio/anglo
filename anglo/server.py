@@ -28,7 +28,6 @@ import time
 import sys
 import io
 import datetime
-import collections
 import typing as t
 from anglo.utils import WSGIApplication
 from anglo.utils import weekdays
@@ -40,18 +39,18 @@ __all__ = [ "AngloServer" ]
 #: Version for the server
 __version__ = "0.1"
 
-def to_bytes(bt, encoding='utf-8'):
+def to_bytes(string, encoding='utf-8'):
     """
     Convert text to bytes
     """
-    if isinstance(bt, collections.ByteString):
-        return bt
+    if isinstance(string, bytes):
+        return string
 
-    elif isinstance(bt, str):
-        return bt.encode(encoding)
+    elif isinstance(string, str):
+        return string.encode(encoding)
 
     else:
-        return bytes(bt)
+        return bytes(string)
 
 class AngloServer:
     """
@@ -137,6 +136,10 @@ class AngloServer:
         #: Start the server by listening to request_queue_size
         self.server_listen()
 
+        #: Setup environment variables for the WSGI Server.
+        self.setup_environ()
+        self.headers_set = []
+
 
     @property
     def version_string(self):
@@ -195,7 +198,7 @@ class AngloServer:
         env = self.base_environ
         env['SERVER_NAME'] = self.server_name
         env['GATEWAY_INTERFACE'] = 'CGI/1.1'
-        env['SERVER_PORT'] = str(self.server_port)
+        env['SERVER_PORT'] = str(self.port)
         env['REMOTE_HOST'] = ''
         env['CONTENT_LENGTH'] = ''
         env['SCRIPT_NAME'] = ''
