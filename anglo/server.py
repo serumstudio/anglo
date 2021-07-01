@@ -30,6 +30,8 @@ import io
 import datetime
 import typing as t
 from anglo.utils import WSGIApplication
+from anglo.utils import weekdays
+from anglo.utils import months
 
 #: Version for the server
 __version__ = "0.1"
@@ -58,7 +60,7 @@ class AlgoServer:
     address_family  = socket.AF_INET
 
 
-    #: The request queue size for the server. Default value: 5
+    #: The request queue size for the server to listen to. Default value: 5
     request_queue_size = 5
 
 
@@ -90,6 +92,37 @@ class AlgoServer:
             pass
 
         self.application = application
+
+        #: The socket object of the server.
+        self.socket = socket.socket(self.address_family, self.socket_type)
+
+        #: Bind the server to the address
+        self.server_bind((self.host, self.port))
         
+        #: Start the server by listening to request_queue_size
+        self.server_listen()
+
+    def server_bind(self, server_address: tuple):
+        """
+        Bind the server to the address given
+
+        Arguments:
+            server_address (tuple):
+                The server address to be bind to. Must be a tuple (<host>, <port>)
+        """
+
+        if self.allow_reuse_address:
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+        #: Bind the socket to the address
+        self.socket.bind(server_address)
+        
+        #: Set the server name by the socket host.
+        host, port  = self.socket.getsockname()[:2]
+        self.server_name = socket.getfqdn(host)
+
+
+    def server_listen(self):
+        #: Start the server by listening to request queue size.
+        self.socket.listen(self.request_queue_size)
     
-        

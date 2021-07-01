@@ -27,6 +27,12 @@ from typing import ( Any, Callable, Dict, Iterable,
         List, Optional, Protocol, Tuple
 )
 
+
+months = (None, "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+          
+weekdays = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+
 class StartResponse(Protocol):
     def __call__(
         self, status: str, headers: List[Tuple[str, str]], exc_info: Optional[sys._OptExcInfo] = ...
