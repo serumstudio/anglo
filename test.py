@@ -1,27 +1,22 @@
 
-from anglo.routing import Router
+# A Test outcome of the framework
 
-class router:
-    def __init__(self):
-        self.routes = {}
-    
-    def get(self, path=None, callback=None, name=None):
-
-        if callable(path): path, callback = None, path
-
-        def deco(callback):
-            self.routes[path] = callback
-            return callback
-
-        return deco(callback) if callback else deco
-
-route = router()
-
-@route.get("/")
-def home():
-    print("homepage")
-
-r = Router()
+from anglo import Anglo, Router, render
 
 
+router = Router()
 
+@router.get("/")
+def homepage(request):
+    return render("<h1>{{ title }}<h1>", title="Homepage")
+
+@router.get("/about")
+def homepage(request):
+    return render("<h1>{{ title }}<h1>", title="About")
+
+
+if __name__ == "__main__":
+    app = Anglo(__name__)
+    app.useRouter(router)
+
+    app.run("", 8080, server="gunicorn")
