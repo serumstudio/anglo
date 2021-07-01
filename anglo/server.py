@@ -28,13 +28,25 @@ import time
 import sys
 import io
 import datetime
+import collections
 import typing as t
 from anglo.utils import WSGIApplication
 from anglo.utils import weekdays
 from anglo.utils import months
 
+
 #: Version for the server
 __version__ = "0.1"
+
+def to_bytes(bt, encoding='utf-8'):
+    if isinstance(bt, collections.ByteString):
+        return bt
+
+    elif isinstance(bt, str):
+        return bt.encode(encoding)
+
+    else:
+        return bytes(bt)
 
 class AlgoServer:
     """
@@ -101,6 +113,28 @@ class AlgoServer:
         
         #: Start the server by listening to request_queue_size
         self.server_listen()
+
+
+    @property
+    def version_string(self):
+        return self.server_version
+
+
+    def date_time_string(self, timestamp=None):
+        """
+        Convert datetime to string
+        """
+
+        if timestamp is None:
+            timestamp = time.time()
+
+        year, month, day, hh, mm, ss, wd, y, z = time.gmtime(timestamp)
+        s = '%s, %02d %3s %4d %02d:%02d:%02d GMT' % (
+            self.weekdayname[wd],
+            day, self.monthname[month], year,
+            hh, mm, ss
+        )
+        return s
 
     def server_bind(self, server_address: tuple):
         """
@@ -221,3 +255,96 @@ class AlgoServer:
             else:
                 headers[k] = v.strip()
 
+    def get_environ(self):
+        """
+        Get the environment variables from WSGI Server. Learn more: https://www.python.org/dev/peps/pep-0333/#environ-variables
+        """
+        
+        env = self.base_environ.copy()
+        env['REQUEST_METHOD'] = self.request_method
+
+        if '?' in self.path:
+            path, query = self.path.split('?', 1)
+        else:
+            path, query = self.path, ''
+
+        #: The path info of the server.
+        #: Example: www.example.com/path - Where as path is the PATH_INFO
+        env['PATH_INFO'] = urllib.parse.unquote(path)
+
+        #: The query string of the server.
+        #: Example: www.example.com/?search=test&encoding=utf-8 - Where as ? is the start of QUERY_STRING
+        env['QUERY_STRING'] = query
+
+        env['CONTENT_TYPE'] = self.headers.get('Content-Type', '')
+        env['CONTENT_LENGTH'] = self.headers.get('Content-Length', '0')
+
+        env['SERVER_PROTOCOL'] = self.request_version
+        env['REMOTE_ADDR'] = self.client_address[0]
+        env['REMOTE_PORT'] = self.client_address[1]
+
+        env['wsgi.version'] = (1, 0)
+        env['wsgi.url_scheme'] = 'http'
+        env['wsgi.input'] = io.BytesIO(self.raw_request)
+        env['wsgi.errors'] = sys.stderr
+        env['wsgi.multithread'] = False
+        env['wsgi.multiprocess'] = True
+        env['wsgi.run_once'] = False
+
+        for k, v in self.headers.items():
+            k = k.replace('-', '_').upper()
+            if k in env:
+                continue
+            env['HTTP_' + k] = v
+
+        return env
+
+    def start_response(self, status, headers, exc_info=None):
+        """
+        Start the response. Usually you can see this as a passed argument from the WSGI Application.
+        """
+
+        server_headers = [
+            ('Date', self.date_time_string()),
+            ('Server', self.version_string()),
+        ]
+
+        headers = list(headers) + server_headers
+
+        if exc_info:
+            try:
+                if self.headers_set:
+                    # Re-raise original exception if headers sent
+                    raise (exc_info[0], exc_info[1], exc_info[2])
+            finally:
+                exc_info = None     # avoid dangling circular ref
+
+        self.headers_set[:] = [status, headers]
+
+    def finish_response(self, body):
+        """
+        Finish the response and send it to the client.
+        
+        """
+        try:
+            status, headers = self.headers_set
+            
+            # status line
+            response = (
+                to_bytes(self.default_request_version) +
+                b' ' +
+                to_bytes(status) +
+                b'\r\n'
+            )
+            # headers
+            response += b'\r\n'.join([to_bytes(': '.join(x)) for x in headers])
+            response += b'\r\n\r\n'
+
+            # body
+            for d in body:
+                response += d
+
+            self.client_connection.sendall(response)
+
+        finally:
+            self.client_connection.close()
