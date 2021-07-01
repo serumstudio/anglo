@@ -96,6 +96,21 @@ class AngloServer:
     def __init__(self, host: t.Optional[str] = "",
             port: t.Optional[int] = 3000, application: WSGIApplication = None):
         
+        """
+        The main `:class:` for the WSGI Server.
+
+        Parameters:
+            host (str): 
+                The host where the server serve. Default value: ''
+            
+            port (int):
+                The port where the server should listen to. Default Value: 3000
+            
+            application (WSGIApplication):
+                The main application for the server
+        """
+
+
         #: The host where the server should listen to.
         #: Default value: '' which means it should listen
         #: To any network interfaces.
