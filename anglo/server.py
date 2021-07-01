@@ -250,9 +250,14 @@ class AngloServer:
 
         # Print the output of the request.
         print('(AngloServer) [%s] "%s %s %s"' % (
-            self.server_version, datetime.datetime.now(), env["REQUEST_METHOD"],
+            datetime.datetime.now(), env["REQUEST_METHOD"],
             env["PATH_INFO"], env["SERVER_PROTOCOL"]
         ))
+
+        result = self.application(env, self.start_response)
+
+        #: Send the response from the client.
+        self.finish_response(result)
 
     def parse_request(self, raw_request):
 
@@ -264,6 +269,8 @@ class AngloServer:
          self.path,             # /foo?a=1&b=2
          self.request_version   # HTTP/1.1
         ) = first_line.split()
+
+        return (self.request_method, self.path, self.request_version)
 
     def parse_headers(self, raw_request):
 
@@ -311,7 +318,7 @@ class AngloServer:
 
         env['wsgi.version'] = (1, 0)
         env['wsgi.url_scheme'] = 'http'
-        env['wsgi.input'] = io.BytesIO(self.raw_request)
+        env['wsgi.input'] = io.BytesIO(self.raw_req)
         env['wsgi.errors'] = sys.stderr
         env['wsgi.multithread'] = False
         env['wsgi.multiprocess'] = True
@@ -332,7 +339,7 @@ class AngloServer:
 
         server_headers = [
             ('Date', self.date_time_string()),
-            ('Server', self.version_string()),
+            ('Server', self.version_string),
         ]
 
         headers = list(headers) + server_headers
