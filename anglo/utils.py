@@ -27,10 +27,9 @@ from typing import ( Any, Callable, Dict, Iterable,
         List, Optional, Protocol, Tuple
 )
 
-
 months = (None, "Jan", "Feb", "Mar", "Apr", "May", "Jun",
           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-          
+
 weekdays = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
 class StartResponse(Protocol):
