@@ -41,6 +41,9 @@ __all__ = [ "AngloServer" ]
 __version__ = "0.1"
 
 def to_bytes(bt, encoding='utf-8'):
+    """
+    Convert text to bytes
+    """
     if isinstance(bt, collections.ByteString):
         return bt
 
