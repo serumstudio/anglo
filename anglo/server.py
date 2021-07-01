@@ -23,7 +23,7 @@
 
 
 import socket
-import urllib
+import urllib.parse
 import time
 import sys
 import io
@@ -92,6 +92,9 @@ class AngloServer:
     #: The version of the server.
     server_version = "AlgoServer/%s" % (__version__)
 
+
+    #: The base environment variables for the server.
+    base_environ = {}
 
     def __init__(self, host: t.Optional[str] = "",
             port: t.Optional[int] = 3000, application: WSGIApplication = None):
@@ -189,7 +192,7 @@ class AngloServer:
 
         #: Set up base environment
         
-        env = self.base_environ = {}
+        env = self.base_environ
         env['SERVER_NAME'] = self.server_name
         env['GATEWAY_INTERFACE'] = 'CGI/1.1'
         env['SERVER_PORT'] = str(self.server_port)
