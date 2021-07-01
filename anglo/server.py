@@ -264,12 +264,8 @@ class AngloServer:
         # GET /foo?a=1&b=2 HTTP/1.1
 
         first_line = raw_request.split(b'\r\n', 1)[0].strip().decode()
+        self.request_method, self.path, self.request_version = first_line.split()
         
-        (self.request_method,   # GET
-         self.path,             # /foo?a=1&b=2
-         self.request_version   # HTTP/1.1
-        ) = first_line.split()
-
         return (self.request_method, self.path, self.request_version)
 
     def parse_headers(self, raw_request):
