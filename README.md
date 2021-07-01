@@ -14,6 +14,19 @@
 </p>
 
 # About
+> **Next**: [Installation](https://github.com/serumstudio/anglo#installation) 
+
+**Anglo** is an *open source* framework use for deploying and developing, **web applications** <br>
+with modern and lightweight integration. It was created to web applications easily and reliable.
+
+It also comes with alot of different [features](https://github.com/serumstudio/anglo#features) that you may want to check out. Anglo was mainly <br>
+built at the top of **WSGI Environment**. It serves as a full wrapper for WSGI that makes your <br>
+production easier. The API wrapper for Anglo is simmilar to famous web framework, **Flask and <br>
+Django.**
+
+| [Learn More](https://serum.studio/anglo)|
+|-------|
+
 
 <div align="right" id="installation">
   <h1> Installation </h1>
