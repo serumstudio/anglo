@@ -35,6 +35,8 @@ from anglo.utils import weekdays
 from anglo.utils import months
 
 
+__all__ = [ "AngloServer" ]
+
 #: Version for the server
 __version__ = "0.1"
 
@@ -48,7 +50,7 @@ def to_bytes(bt, encoding='utf-8'):
     else:
         return bytes(bt)
 
-class AlgoServer:
+class AngloServer:
     """
     The main `:class:` for the WSGI Server.
 
@@ -328,7 +330,7 @@ class AlgoServer:
         """
         try:
             status, headers = self.headers_set
-            
+
             # status line
             response = (
                 to_bytes(self.default_request_version) +
