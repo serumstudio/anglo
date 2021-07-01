@@ -29,10 +29,12 @@ import sys
 import io
 import datetime
 import typing as t
-from wsgiref import simple_server
+from anglo.utils import WSGIApplication
 
+#: Version for the server
+__version__ = "0.1"
 
-class Algo:
+class AlgoServer:
     """
     The main `:class:` for the WSGI Server.
 
@@ -47,7 +49,47 @@ class Algo:
             The main application for the server
     """
 
+    #: A socket type for the WSGI Server. Usually socket.SOCK_STREAM
+    socket_type = socket.SOCK_STREAM
+
+
+    #: Address Family for the socket object. Usually AF_INET or
+    #: Address Family Internet
+    address_family  = socket.AF_INET
+
+
+    #: The request queue size for the server. Default value: 5
+    request_queue_size = 5
+
+
+    #: Inorder to allow reuse the address, Make sure to make the value True
+    allow_reuse_address = True
+
+
+    #: The default request version should be HTTP/1.1
+    default_request_version = "HTTP/1.1"
+
+
+    #: The version of the server.
+    server_version = "AlgoServer/%s" % (__version__)
+
+
     def __init__(self, host: t.Optional[str] = "",
             port: t.Optional[int] = 3000, application: WSGIApplication = None):
         
-        pass
+        #: The host where the server should listen to.
+        #: Default value: '' which means it should listen
+        #: To any network interfaces.
+        self.host = host
+
+        #: The port where the server should listen to. Default Value: 3000
+        self.port = port
+
+        #: The main WSGI application. If None, return Exception
+        if application == None:
+            pass
+
+        self.application = application
+        
+    
+        
