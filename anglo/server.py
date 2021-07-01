@@ -90,7 +90,7 @@ class AngloServer:
 
 
     #: The version of the server.
-    server_version = "AlgoServer/%s" % (__version__)
+    server_version = "AngloServer/%s" % (__version__)
 
 
     #: The base environment variables for the server.
@@ -246,7 +246,7 @@ class AngloServer:
         env = self.get_environ()
 
         # Print the output of the request.
-        print('(%s) [%s] "%s %s %s"' % (
+        print('(AngloServer) [%s] "%s %s %s"' % (
             self.server_version, datetime.datetime.now(), env["REQUEST_METHOD"],
             env["PATH_INFO"], env["SERVER_PROTOCOL"]
         ))
