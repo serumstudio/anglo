@@ -32,14 +32,14 @@ months = (None, "Jan", "Feb", "Mar", "Apr", "May", "Jun",
 
 weekdays = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
+
 class StartResponse(Protocol):
     def __call__(
-        self, status: str, headers: List[Tuple[str, str]], exc_info: Optional[sys._OptExcInfo] = ...
+        self, status: str, headers: List[Tuple[str, str]], exc_info: Optional[None] = ...
     ) -> Callable[[bytes], Any]: ...
 
 WSGIEnvironment = Dict[str, Any]  # stable
 WSGIApplication = Callable[[WSGIEnvironment, StartResponse], Iterable[bytes]]  # stable
-
 
 def get_root_path(import_name: str) -> str:
     """
