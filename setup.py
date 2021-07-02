@@ -20,6 +20,9 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from setuptools import setup, find_packages, version
+from anglo import ( __author__, 
+        __version__, __license__
+    )
 
 def get_long_description():
 
