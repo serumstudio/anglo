@@ -169,11 +169,11 @@ def build_choice_route(pattern, finishing=True, kwargs=None, name=None):
     """If the choince route regular expression match the pattern
     than create a ChoiceRoute instance.
     """
-    if isinstance(pattern, Choice):
+    if isinstance(pattern, ChoiceRoute):
         return pattern
     m = RE_CHOICE_ROUTE.match(pattern)
     if m:
-        return Choice(pattern, finishing, kwargs, name)
+        return ChoiceRoute(pattern, finishing, kwargs, name)
     return None
 
 route_builders = [ build_plain_route, build_regex_route, build_curly_route, build_choice_route ]

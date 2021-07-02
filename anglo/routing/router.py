@@ -72,6 +72,14 @@ class BaseRouter:
 
     """
 
+    __slots__ = (
+        "builders",
+        "match_map",
+        "mapping",
+        "route_map",
+        "inner_route_map"
+    )
+
     def __init__(self, builders=None):
         
         #: A route builder rule for the router.
@@ -96,6 +104,7 @@ class BaseRouter:
         name = name or route_name(name)
 
         route = build_route(pattern, True, kwargs, name, self.builders)
+
         self.route_map[name] = route.path
 
         if route.exact_matches:
@@ -145,19 +154,19 @@ class BaseRouter:
             self.mapping.append((route.match, included))
         route_path = route.path
 
-        for name, path in included.path_map.items():
-            if name in self.inner_route_Map:  
+        for name, path in included.route_map.items():
+            if name in self.inner_route_map:  
                 print(f"{pattern} Already exists. Overriding..")
 
-            self.inner_route_Map[name] = (route_path, path)
-        included.path_map = None
+            self.inner_route_map[name] = (route_path, path)
+        included.route_map = None
 
-        for name, paths in included.inner_route_Map.items():
-            if name in self.inner_route_Map:  
+        for name, paths in included.inner_route_map.items():
+            if name in self.inner_route_map:  
                 print(f"{pattern} Already exists. Overriding..")
 
-            self.inner_route_Map[name] = tuple([route_path] + list(paths))
-        included.inner_route_Map = None
+            self.inner_route_map[name] = tuple([route_path] + list(paths))
+        included.inner_route_map = None
         
 
     def add_routes(self, routes):
@@ -193,6 +202,7 @@ class BaseRouter:
             return self.match_map[path]
 
         for match, handler in self.mapping:
+            print(match, handler)
             matched, kwargs = match(path)
             if matched >= 0:
                 # TODO: isinstance(handler, BaseRouter)
@@ -206,7 +216,10 @@ class BaseRouter:
                         return handler, kwargs_inner
                     if kwargs_inner:
                         kwargs = dict(kwargs, **kwargs_inner)
+                    
                     return handler, kwargs
+
+                    
 
         return None, {}
 
@@ -217,7 +230,7 @@ class BaseRouter:
         """
 
         if name in self.route_map:
-            return self.path_map[name](kwargs)
+            return self.route_map[name](kwargs)
 
         else:
             return "".join(
