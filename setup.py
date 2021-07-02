@@ -21,3 +21,25 @@
 
 from setuptools import setup, find_packages, version
 
+def get_long_description():
+
+    with open("README.md", encoding="utf-8") as f:
+        readme = f.read()
+
+    return readme
+
+
+setup(
+    
+    name="anglo", 
+    description="🪐 A modern lightweight micro web framework for Python 3.",
+    long_description=get_long_description(),
+    long_description_content_type='text/markdown',
+    author = __author__,
+    license = __license__,
+    version = __version__,
+    packages = find_packages(),
+    install_requires = [
+        "rich" # For console.
+    ]
+)
