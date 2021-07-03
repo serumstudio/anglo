@@ -54,7 +54,10 @@ def to_bytes(string, encoding='utf-8'):
 
 class AngloSocketServer:
     """
-    The main `:class:` for the WSGI Server.
+    The main `:class:` for the WSGI Socket Server.
+
+    # This class will be deprecated on the future version. 
+    # Use AngloServer instead.
 
     Parameters:
         host (str): 
