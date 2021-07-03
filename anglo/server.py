@@ -206,7 +206,7 @@ class AngloServerHandler(HTTPServer):
         env = self.base_environ = {}
         env['SERVER_NAME'] = self.server_name
         env['GATEWAY_INTERFACE'] = 'CGI/1.1'
-        env['SERVER_PORT'] = str(self.port)
+        env['SERVER_PORT'] = str(self.server_port)
         env['REMOTE_HOST'] = ''
         env['CONTENT_LENGTH'] = ''
         env['SCRIPT_NAME'] = ''
