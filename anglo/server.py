@@ -245,6 +245,9 @@ class AngloServer:
             # Development | Debugging status
             self.server.serve_forever()
 
+        else:
+            self.server.serve_forever()
+
 
 class AngloSocketServer:
     """
