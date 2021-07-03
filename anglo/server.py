@@ -191,7 +191,7 @@ class AngloServerHandler(HTTPServer):
         Bind the server to the host specified.
         """
 
-        self.server_bind(self)
+        HTTPServer.server_bind(self)
         self.setup_environ()
 
     
