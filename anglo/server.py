@@ -23,6 +23,8 @@
 
 
 import socket
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import BaseRequestHandler
 import urllib.parse
 import time
 import sys
@@ -32,6 +34,8 @@ import typing as t
 from anglo.utils import WSGIApplication
 from anglo.utils import weekdays
 from anglo.utils import months
+from wsgiref.handlers import SimpleHandler
+
 
 
 __all__ = [ "AngloSocketServer", "AngloServer" ]
@@ -52,31 +56,146 @@ def to_bytes(string, encoding='utf-8'):
     else:
         return bytes(string)
 
+class ServerHandler(SimpleHandler):
+    server_software = software_version
+
+    def close(self):
+        try:
+            self.request_handler.log_request(
+                self.status.split(' ',1)[0], self.bytes_sent
+            )
+            
+        finally:
+            SimpleHandler.close(self)
+
+class AngloRequestHandler(BaseRequestHandler):
+    """
+    A Base class for handling Request.
+
+    """
+
+    server_version = f"AngloServer/{__version__}"
+
+    def get_environ(self):
+        """
+        Get the environment variables from WSGI Server. Learn more: https://www.python.org/dev/peps/pep-0333/#environ-variables
+        """
+        
+        env = self.server.base_environ.copy()
+        env['SERVER_PROTOCOL'] = self.request_version
+        env['SERVER_SOFTWARE'] = self.server_version
+        env['REQUEST_METHOD'] = self.command
+        
+        if '?' in self.path:
+            path,query = self.path.split('?',1)
+        else:
+            path,query = self.path,''
+
+        env['PATH_INFO'] = urllib.parse.unquote(path, 'iso-8859-1')
+        env['QUERY_STRING'] = query
+
+        host = self.address_string()
+        if host != self.client_address[0]:
+            env['REMOTE_HOST'] = host
+        
+        env['REMOTE_ADDR'] = self.client_address[0]
+
+        if self.headers.get('content-type') is None:
+            env['CONTENT_TYPE'] = self.headers.get_content_type()
+        
+        else:
+            env['CONTENT_TYPE'] = self.headers['content-type']
+
+        length = self.headers.get('content-length')
+        if length:
+            env['CONTENT_LENGTH'] = length
+
+        for k, v in self.headers.items():
+
+            k = k.replace('-','_').upper(); v=v.strip()
+            if k in env:
+                continue    # skip content length, type,etc.
+            
+            if 'HTTP_'+k in env:
+                env['HTTP_' + k] += ',' + v # comma-separate multiple headers
+            
+            else:
+                env['HTTP_' + k ] = v
+        
+        return env
+
+
+    def handle(self):
+        """
+        Handle only single request.
+        """
+
+        self.rfile
 
 class AngloServerHandler:
     """
     The main `:class:` for handling the Server.
 
     Parameters:
-        host (str):
-            The host where the server should listen to. 
+        This BaseClass doesnt required a parameter to be specify when initialized.
 
+    When calling the class, you need to specify some parameters:
+        host (str): 
+            The host where the server should listen to
+        
         port (int):
-            The port where the server should listen to.
-            
+            The port where the server should listen to
+
+        
     """
 
-    def __init__(self, host: t.Optional[str] = "localhost", 
-                port: t.Optional[int] = 3000 ):
+    __application = None
+    __http_server = HTTPServer
 
-        #: The host where the server should listen to
-        #: Default value: localhost
-        self.host = host
+    @property
+    def application(self):
+        return self.__application
+
+    @application.setter
+    def application(self, app: WSGIApplication = None):
+        if app == None:
+            raise ValueError("Application cannot be None.")
+
+        self.__application = app
+        return self.__application
 
 
-        #: The port where the server should listen to
-        #: Default value: 3000
-        self.port = port
+    def server_bind(self):
+        """
+        Bind the server to the host specified.
+        """
+
+        self.__http_server.server_bind(self)
+        self.setup_environ()
+
+    
+    def setup_environ(self):
+        """
+        Set the environment variables for the WSGI Server. See: https://www.python.org/dev/peps/pep-0333/#environ-variables 
+        for more information.
+        """
+
+        #: Set up base environment
+        
+        env = self.base_environ = {}
+        env['SERVER_NAME'] = self.__http_server.server_name
+        env['GATEWAY_INTERFACE'] = 'CGI/1.1'
+        env['SERVER_PORT'] = str(self.port)
+        env['REMOTE_HOST'] = ''
+        env['CONTENT_LENGTH'] = ''
+        env['SCRIPT_NAME'] = ''
+
+    def __call__(self, host: t.Optional[str] = 'localhost',
+                port: t.Optional[int] = 3000, 
+                handler_class: AngloRequestHandler = None):
+        
+        server = self.__http_server((host, port), handler_class)
+        return server
 
 
 
