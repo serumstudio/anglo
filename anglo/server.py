@@ -154,7 +154,7 @@ class AngloRequestHandler(BaseHTTPRequestHandler):
         handler.run(self.server.application)
 
 
-class AngloServerHandler:
+class AngloServerHandler(HTTPServer):
     """
     The main `:class:` for handling the Server.
 
@@ -172,7 +172,6 @@ class AngloServerHandler:
     """
 
     __application = None
-    __http_server = HTTPServer
 
     @property
     def application(self):
@@ -192,7 +191,7 @@ class AngloServerHandler:
         Bind the server to the host specified.
         """
 
-        self.__http_server.server_bind(self)
+        self.server_bind(self)
         self.setup_environ()
 
     
@@ -205,13 +204,12 @@ class AngloServerHandler:
         #: Set up base environment
         
         env = self.base_environ = {}
-        env['SERVER_NAME'] = self.__http_server.server_name
+        env['SERVER_NAME'] = self.server_name
         env['GATEWAY_INTERFACE'] = 'CGI/1.1'
         env['SERVER_PORT'] = str(self.port)
         env['REMOTE_HOST'] = ''
         env['CONTENT_LENGTH'] = ''
         env['SCRIPT_NAME'] = ''
-
 
 
 
@@ -237,10 +235,15 @@ class AngloServer:
 
     def __init__(self, host: t.Optional[str] = "localhost",
                 port: t.Optional[int] = 3000, application: WSGIApplication = None,
-                debug: t.Optional[bool] = True, handler = AngloRequestHandler):
+                handler = AngloRequestHandler):
 
-    
+        self.server = AngloServerHandler((host, port), handler)
+        self.server.application = application
 
+    def run(self, debug: t.Optional[bool] = True):
+        if debug:
+            # Development | Debugging status
+            self.server.serve_forever()
 
 
 class AngloSocketServer:
