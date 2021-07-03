@@ -43,18 +43,6 @@ __all__ = [ "AngloSocketServer", "AngloServer" ]
 #: Version for the server
 __version__ = "0.1"
 
-def to_bytes(string, encoding='utf-8'):
-    """
-    Convert text to bytes
-    """
-    if isinstance(string, bytes):
-        return string
-
-    elif isinstance(string, str):
-        return string.encode(encoding)
-
-    else:
-        return bytes(string)
 
 class ServerHandler(SimpleHandler):
     server_software = software_version
@@ -64,7 +52,7 @@ class ServerHandler(SimpleHandler):
             self.request_handler.log_request(
                 self.status.split(' ',1)[0], self.bytes_sent
             )
-            
+
         finally:
             SimpleHandler.close(self)
 
