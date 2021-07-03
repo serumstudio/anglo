@@ -39,7 +39,6 @@ from wsgiref.handlers import SimpleHandler
 from platform import python_implementation
 
 
-__all__ = [ "AngloSocketServer", "AngloServer" ]
 
 #: Version for the server
 __version__ = "0.1"
