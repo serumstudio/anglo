@@ -253,9 +253,6 @@ class AngloSocketServer:
     """
     The main `:class:` for the WSGI Socket Server.
 
-    # This class will be deprecated on the future version. 
-    # Use AngloServer instead.
-
     Parameters:
         host (str): 
             The host where the server serve. Default value: ''
