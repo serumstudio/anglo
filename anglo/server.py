@@ -34,7 +34,7 @@ from anglo.utils import weekdays
 from anglo.utils import months
 
 
-__all__ = [ "AngloServer" ]
+__all__ = [ "AngloSocketServer", "AngloServer" ]
 
 #: Version for the server
 __version__ = "0.1"
@@ -52,7 +52,7 @@ def to_bytes(string, encoding='utf-8'):
     else:
         return bytes(string)
 
-class AngloServer:
+class AngloSocketServer:
     """
     The main `:class:` for the WSGI Server.
 
