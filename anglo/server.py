@@ -23,8 +23,8 @@
 
 
 import socket
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from socketserver import BaseRequestHandler
+from http.server import HTTPServer
+from http.server import BaseHTTPRequestHandler
 import urllib.parse
 import time
 import sys
@@ -36,17 +36,22 @@ from anglo.utils import weekdays
 from anglo.utils import months
 from anglo.utils import to_bytes
 from wsgiref.handlers import SimpleHandler
-
+from platform import python_implementation
 
 
 __all__ = [ "AngloSocketServer", "AngloServer" ]
 
 #: Version for the server
 __version__ = "0.1"
+sys_version = f"{python_implementation()}/{sys.version.split()[0]}"
 
 
 class ServerHandler(SimpleHandler):
-    server_software = software_version
+    """
+    A server handler for handling requst from WSGI Environment.
+
+    """
+    server_software = f"AngloServer/{__version__} {sys_version}"
 
     def close(self):
         try:
@@ -57,13 +62,20 @@ class ServerHandler(SimpleHandler):
         finally:
             SimpleHandler.close(self)
 
-class AngloRequestHandler(BaseRequestHandler):
+
+class AngloRequestHandler(BaseHTTPRequestHandler):
     """
     A Base class for handling Request.
 
     """
-
+    __recv_value = 65537
     server_version = f"AngloServer/{__version__}"
+
+
+    @property
+    def stderr(self):
+        return sys.stderr
+
 
     def get_environ(self):
         """
@@ -119,7 +131,28 @@ class AngloRequestHandler(BaseRequestHandler):
         Handle only single request.
         """
 
-        self.rfile
+        self.raw_requestline = self.rfile.readline(self.__recv_value)
+
+        if len(self.raw_requestline) > self.__recv_value - 1:
+
+            self.requestline = ''
+            self.request_version = ''
+            self.command = ''
+            self.send_error(414)
+
+            return
+
+        if not self.parse_request(): # An error code has been sent, just exit
+            return
+
+        handler = ServerHandler(
+            self.rfile, self.wfile, self.stderr, self.get_environ(),
+            multithread=False,
+        )
+
+        handler.request_handler = self      # backpointer for logging
+        handler.run(self.server.application)
+
 
 class AngloServerHandler:
     """
@@ -179,12 +212,6 @@ class AngloServerHandler:
         env['CONTENT_LENGTH'] = ''
         env['SCRIPT_NAME'] = ''
 
-    def __call__(self, host: t.Optional[str] = 'localhost',
-                port: t.Optional[int] = 3000, 
-                handler_class: AngloRequestHandler = None):
-        
-        server = self.__http_server((host, port), handler_class)
-        return server
 
 
 
@@ -208,6 +235,11 @@ class AngloServer:
             Define if the debugger is True.
     """
 
+    def __init__(self, host: t.Optional[str] = "localhost",
+                port: t.Optional[int] = 3000, application: WSGIApplication = None,
+                debug: t.Optional[bool] = True, handler = AngloRequestHandler):
+
+    
 
 
 
