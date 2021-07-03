@@ -55,4 +55,15 @@ def get_root_path(import_name: str) -> str:
     if module is not None and hasattr(module, "__file__"):
         return os.path.dirname(os.path.realpath(module.__file__))
 
-    
+def to_bytes(string, encoding='utf-8'):
+    """
+    Convert text to bytes
+    """
+    if isinstance(string, bytes):
+        return string
+
+    elif isinstance(string, str):
+        return string.encode(encoding)
+
+    else:
+        return bytes(string)    
