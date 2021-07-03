@@ -52,6 +52,57 @@ def to_bytes(string, encoding='utf-8'):
     else:
         return bytes(string)
 
+
+class AngloServerHandler:
+    """
+    The main `:class:` for handling the Server.
+
+    Parameters:
+        host (str):
+            The host where the server should listen to. 
+
+        port (int):
+            The port where the server should listen to.
+            
+    """
+
+    def __init__(self, host: t.Optional[str] = "localhost", 
+                port: t.Optional[int] = 3000 ):
+
+        #: The host where the server should listen to
+        #: Default value: localhost
+        self.host = host
+
+
+        #: The port where the server should listen to
+        #: Default value: 3000
+        self.port = port
+
+
+
+class AngloServer:
+    """
+    The main `:class:` for the WSGI Server. Probably a HTTPServer
+    with WSGI Protocol implemention. This server should use for development
+    rather than production, haven't tried on production yet.
+
+    Parameters:
+        host (str):
+            The host where the server should listen to.
+        
+        port (int):
+            The port where the server should listen to.
+
+        application (WSGIApplication):
+            The main applicaation for WSGIEnvironment.
+
+        debug (bool):
+            Define if the debugger is True.
+    """
+
+
+
+
 class AngloSocketServer:
     """
     The main `:class:` for the WSGI Socket Server.
