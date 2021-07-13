@@ -30,3 +30,4 @@ __pycache__/
 # Testing
 tests/
 test/
+_test.py
