@@ -64,6 +64,5 @@ class Session:
         #: Set the app parameter to a global variable
         self.app = app
 
-        
 
     
