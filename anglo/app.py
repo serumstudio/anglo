@@ -22,13 +22,19 @@
 
 
 from typing import Optional
+from typing import Callable
+from typing import Any 
 from anglo.utils import get_root_path
+from anglo.routing import Router
 
 class Anglo:
     """
     This `:class:` implements WSGI application that holds
     routing, session, middlewares and more.
     """
+
+    #: The main router for the app
+    __router = Router()
 
     def __init__(self, name: str,
             static_folder: Optional[str] = "static",
@@ -61,5 +67,53 @@ class Anglo:
         self.template_folder    = template_folder
 
 
+    def route(self, path: str, 
+            name: Optional[str] = None, 
+            _func: Callable[..., Any] = None, **options):
+        
 
-    
+        """
+        A route decorator that binds function to the wsgi application.
+
+        Example:
+
+            >>> @app.route('/')
+            >>> def homepage(request):
+            >>>     return "Hello World!"
+
+        Parameters:
+            path (str):
+                A route path to be used.
+
+            name (str):
+                The name of the router. [Optional]
+
+            _func (function):
+                The main wrapper / function for the decorator.
+
+            options (kwargs):
+                Additional options for the router.
+        
+        """
+
+        if callable(path): path, _func = None, path
+
+        def deco(_func):
+            self.__router.add_route(path, _func, name, options)
+
+            return deco
+
+
+        return deco(_func) if _func else deco
+
+
+    def __call__(self, environ, start_response):
+        handler, _ = self.__router.match(environ['PATH_INFO'])
+
+        if handler == None:
+            start_response("404 Not Found", [('Content-Type', 'text/html')])
+
+        else:
+            return handler(environ, start_response)
+        
+        
