@@ -112,8 +112,8 @@ class Anglo:
 
         if handler == None:
             start_response("404 Not Found", [('Content-Type', 'text/html')])
+            return [b"404 Not Found"]
 
         else:
             return handler(environ, start_response)
-        
         

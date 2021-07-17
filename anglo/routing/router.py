@@ -259,11 +259,11 @@ class Router(BaseRouter):
                 Get the url for the given route name.
 
     """
-
     def __init__(self, builders=None):
-        super().__init__(self, builders=builders)
+        BaseRouter.__init__(self, builders=builders)
+
         self.routes = {}
-    
+
     def __match_routes(self, route):
         pass
 
