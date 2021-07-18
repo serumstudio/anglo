@@ -18,3 +18,37 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+class Request:
+    """
+    
+    A request wrapper for the application. 
+    This class cannot be used directly. It was parsed by the application.
+
+    Example:
+       
+        >>> app = Anglo(__name__)
+        >>> @app.route('/')
+        >>> def home(request): # -> Here is the request that was passed by the application.
+        >>>     print(request)
+        >>>     return "Home Page"
+
+    Parameters:
+
+        environ(dict): 
+            A environment variables of the app.
+            
+    """
+
+    #: The query args of the request.
+    __args: dict = {}
+
+    def __init__(self, environ: dict):
+        self.env = environ
+
+
+    @property
+    def args(self):
+
+        return self.__args
