@@ -41,8 +41,8 @@ setup(
     author = __author__,
     license = __license__,
     version = __version__,
-    packages = find_packages(),
+    packages = [p for p in find_packages() if 'test' not in p],
     install_requires = [
-        "rich" # For console.
+        "hypecli[standard]"
     ]
 )
